@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test jeux pourris</title>
+
+
+    <style>
+        #space{
+            border : 1px solid red;
+        }
+        #space_wrapper{
+            padding: 2px;
+            border-left: 1px solid blue;
+            border-bottom: 1px solid blue;
+            height: 500px;
+            width: 500px;
+            position: relative;
+        }
+
+        #space_wrapper div{
+            width: 10px;
+            height: 20px;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+
+    <section id="space">
+        <div id="space_wrapper">
+        </div>
+    </section>
+
+    <section id="chat_zone">
+
+    </section>
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://localhost:1337');
+        var pseudo = prompt('Choisissez un pseudo');
+        socket.emit('nouveau_client',pseudo);
+        document.title = pseudo + ' - ' + document.title;
+
+        console.log("ok");
+        socket.on('new_player',function(user){
+            console.log(user);
+            $('#chat_zone').prepend('<p><em>'+ user.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
+                '' +
+                '<span style="color:'+user.color+';">'+user.color+'</span>');
+            $.each(user.registry,function(key,value){
+                console.log(key);
+                console.log(value);
+                $("#space_wrapper").append("<div id='"+value.pseudo+"'</div>");
+                $("#"+value.pseudo).css("width","10px");
+                $("#"+value.pseudo).css("height","20px");
+                $("#"+value.pseudo).css("margin-top",value.y_pos);
+                $("#"+value.pseudo).css("margin-left",value.x_pos);
+                $("#"+value.pseudo).css("border","1px solid "+value.color);
+            })
+
+        });
+
+
+        socket.on('players_pos_update',function(user){
+            console.log(user);
+            $("#"+user.pseudo).css("margin-top",user.y_pos+"px");
+            $("#"+user.pseudo).css("margin-left",user.x_pos+"px");
+        });
+
+
+
+        $(document).keydown(function(e) {
+            switch(e.which) {
+                case 37: // left
+                    socket.emit('update_player_pos',{x:-10,y:0});
+                    break;
+
+                case 38: // up
+                    socket.emit('update_player_pos',{y:-10,x:0});
+                    break;
+
+                case 39: // right
+                    socket.emit('update_player_pos',{x:10,y:0});
+                    break;
+
+                case 40: // down
+                    socket.emit('update_player_pos',{y:10,x:0});
+                    break;
+
+                default: return; // exit this handler for other keys
+            }
+            e.preventDefault(); // prevent the default action (scroll / move caret)
+        });
+
+
+    </script>
+</body>
+</html>
