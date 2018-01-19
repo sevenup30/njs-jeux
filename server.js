@@ -63,9 +63,10 @@ io.sockets.on('connection', function(socket,pseudo){
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 3; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
+    color += color ;
     return color;
 }
 function getRandomPseudo() {
