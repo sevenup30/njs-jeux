@@ -13,8 +13,8 @@
             padding: 2px;
             border-left: 1px solid blue;
             border-bottom: 1px solid blue;
-            height: 500px;
-            width: 500px;
+            height: 1000px;
+            width: 1000px;
             position: relative;
         }
 
@@ -22,6 +22,10 @@
             width: 10px;
             height: 20px;
             position: absolute;
+            border-radius: 20%;
+            color: black;
+            background-image: url('/homer-simpson.svg');
+            background-size: contain;
         }
         #chat_zone{
             background-color: grey;
@@ -64,12 +68,13 @@
                 '<span style="color:'+user.color+';">'+user.color+'</span>');
             $.each(user.registry,function(key,value){
 
-                $("#space_wrapper").append("<div id='"+value.pseudo+"'</div>");
-                $("#"+value.pseudo).css("width","10px");
-                $("#"+value.pseudo).css("height","20px");
+                $("#space_wrapper").append("<div id='"+value.pseudo+"'>"+value.pseudo+"</div>");
+                $("#"+value.pseudo).css("width","100px");
+                $("#"+value.pseudo).css("height","100px");
                 $("#"+value.pseudo).css("margin-top",value.y_pos);
                 $("#"+value.pseudo).css("margin-left",value.x_pos);
                 $("#"+value.pseudo).css("border","1px solid "+value.color);
+                $("#"+value.pseudo).css("background-color",value.color);
             })
 
         });

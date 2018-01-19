@@ -1,4 +1,5 @@
-var app = require('express')(),
+var express = require('express');
+var app = express(),
     server = require('http').createServer(app),
     io = require('socket.io').listen(server),
     ent = require('ent');
@@ -6,9 +7,9 @@ var app = require('express')(),
 app.get('/', function(req,res){
     res.sendfile(__dirname+'/index.html');
 });
-
-var space_x_length = 500;
-var space_y_length = 500;
+app.use(express.static(__dirname + '/img'));
+var space_x_length = 1000;
+var space_y_length = 1000;
 var user_size_x = 10;
 var user_size_y = 20;
 var user_registry = {};
@@ -66,7 +67,7 @@ function getRandomColor() {
     for (var i = 0; i < 3; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
-    color += color ;
+    //color += color ;
     return color;
 }
 function getRandomPseudo() {
@@ -77,4 +78,4 @@ function getRandomPseudo() {
     }
     return pseudo;
 }
-server.listen(process.env.PORT || 8080);
+server.listen(1337);
