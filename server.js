@@ -78,4 +78,4 @@ function getRandomPseudo() {
     }
     return pseudo;
 }
-server.listen(1337);
+server.listen(process.env.PORT || 8080);
