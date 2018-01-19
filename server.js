@@ -14,7 +14,12 @@ var user_size_y = 20;
 var user_registry = {};
 io.sockets.on('connection', function(socket,pseudo){
     socket.on('nouveau_client',function(pseudo){
-        pseudo = ent.encode(pseudo);
+        if(pseudo == ""){
+            pseudo = getRandomPseudo();
+        }else{
+            pseudo = ent.encode(pseudo);
+        }
+
         socket.user = {pseudo:pseudo,
                         x_pos:0,
                         y_pos:480,
@@ -58,4 +63,12 @@ function getRandomColor() {
     }
     return color;
 }
-server.listen(1337);
+function getRandomPseudo() {
+    var letters = '0123456789ABCDEF';
+    var pseudo = 'Player-';
+    for (var i = 0; i < 6; i++) {
+        pseudo += letters[Math.floor(Math.random() * 16)];
+    }
+    return pseudo;
+}
+server.listen(8080);
