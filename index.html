@@ -23,6 +23,11 @@
             height: 20px;
             position: absolute;
         }
+        #chat_zone{
+            background-color: grey;
+            color: black;
+            overflow-y:scroll ;
+        }
     </style>
 </head>
 <body>
@@ -31,6 +36,13 @@
         <div id="space_wrapper">
         </div>
     </section>
+
+    <h1> WorkShop CHAT</h1>
+
+    <form action="/" method="post" id="formulaire_chat">
+        <input type="text" id="message" name="message" placeholder="Votre message..." size="100" autofocus/>
+        <input type="submit" id="envoi_message" value="Envoyer"/>
+    </form>
 
     <section id="chat_zone">
 
@@ -46,13 +58,12 @@
 
         console.log("ok");
         socket.on('new_player',function(user){
-            console.log(user);
+
             $('#chat_zone').prepend('<p><em>'+ user.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
                 '' +
                 '<span style="color:'+user.color+';">'+user.color+'</span>');
             $.each(user.registry,function(key,value){
-                console.log(key);
-                console.log(value);
+
                 $("#space_wrapper").append("<div id='"+value.pseudo+"'</div>");
                 $("#"+value.pseudo).css("width","10px");
                 $("#"+value.pseudo).css("height","20px");
@@ -65,7 +76,7 @@
 
 
         socket.on('players_pos_update',function(user){
-            console.log(user);
+
             $("#"+user.pseudo).css("margin-top",user.y_pos+"px");
             $("#"+user.pseudo).css("margin-left",user.x_pos+"px");
         });
@@ -96,6 +107,24 @@
         });
 
 
+        // Envoie des messages vers le serveur
+
+        $('#formulaire_chat').submit(function(){
+            var message = $('#message').val();
+            socket.emit('message',message);
+            insereMessage(pseudo,message);
+            $('#message').val('').focus();
+
+            return false;
+        });
+
+        function insereMessage(pseudo,message){
+            $('#chat_zone').prepend('<p><strong>'+pseudo +'</strong> : '+ message+'</p>')
+        }
+        // Listener des messages envoyé par le broadcast du serveur
+        socket.on('message', function(data){
+            insereMessage(data.pseudo, data.message)
+        });
     </script>
 </body>
 </html>

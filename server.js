@@ -53,6 +53,11 @@ io.sockets.on('connection', function(socket,pseudo){
           user_registry[socket.user.pseudo] = socket.user;
           console.log(socket.user);
     });
+
+    socket.on('message', function(message){
+        message = ent.encode(message);
+        socket.broadcast.emit('message', {pseudo: socket.user.pseudo, message: message});
+    })
 });
 
 function getRandomColor() {
