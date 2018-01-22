@@ -8,10 +8,13 @@ app.get('/', function(req,res){
     res.sendfile(__dirname+'/index.html');
 });
 app.use(express.static(__dirname + '/img'));
+app.use(express.static(__dirname + '/sound'));
 var space_x_length = 1000;
 var space_y_length = 1000;
 var user_size_x = 100;
 var user_size_y = 100;
+var prop_size_x = 20;
+var prop_size_y = 20;
 var user_registry = {};
 var props_registry = {};
 var props_last_id = 0;
@@ -41,13 +44,22 @@ io.sockets.on('connection', function(socket,pseudo){
     });
 
     socket.on('update_player_pos',function(data){
-          if(socket.user.x_pos + (data.x) >= 0 && socket.user.x_pos + (data.x) <= space_x_length  ){
-              socket.user.x_pos = socket.user.x_pos + (data.x);
+        speed_bonus = 0;
+        if(socket.user.y_size < user_size_y && socket.user.x_size < user_size_x){
+            speed_bonus = (user_size_x - socket.user.x_size)/10;
+        }
+          if(socket.user.x_pos + (data.x) >= 0 && socket.user.x_pos + (data.x+speed_bonus) <= space_x_length  ){
+            if(data.x != 0){
+                socket.user.x_pos = socket.user.x_pos + (data.x+speed_bonus);
+            }
           }
-          if(socket.user.y_pos + (data.y) >= 0 && socket.user.y_pos + (data.y) <= space_y_length  ){
-              socket.user.y_pos = socket.user.y_pos + (data.y);
+          if(socket.user.y_pos + (data.y) >= 0 && socket.user.y_pos + (data.y+speed_bonus) <= space_y_length  ){
+              if(data.y != 0){
+                  socket.user.y_pos = socket.user.y_pos + (data.y+speed_bonus);
+              }
           }
         checkUserPropsColision(socket.user);
+          checkPlayersColision(socket.user);
         io.emit('players_pos_update',{pseudo:socket.user.pseudo,
                 x_pos:socket.user.x_pos,
                 y_pos:socket.user.y_pos});
@@ -57,7 +69,6 @@ io.sockets.on('connection', function(socket,pseudo){
           if(generateNewProps == 50){
               newPropsGenerated = generateRandomProps();
               io.emit('new_props_generated',newPropsGenerated);
-              console.log("propsgenerated");
           }
     });
 
@@ -89,6 +100,8 @@ function generateRandomProps() {
     var Props = {}
     //0 = bonus 1 = malus
     Props.type = getRandomInt(2);
+    Props.x_size = prop_size_x;
+    Props.y_size = prop_size_y;
     Props.y_pos = getRandomInt(space_y_length);
     Props.x_pos = getRandomInt(space_x_length);
     Props.id = "props_"+props_last_id;
@@ -105,13 +118,8 @@ function checkUserPropsColision(user){
        Object.keys(props_registry).map(function(key,index){
            var prop = props_registry[key];
             if(prop.available == 1){
-               /* console.log("----------------------------------")
-                console.log((prop.y_pos+10)+" --  "+(prop.x_pos+5));
-                console.log(user.y_pos+" ---"+(user.y_pos + user.y_size));
-                console.log(user.x_pos+" ---"+(user.x_pos + user.x_size));
-                console.log("----------------------------------")*/
-                if((prop.y_pos+10) >= user.y_pos && (prop.y_pos+10) <= (user.y_pos+user.y_size)){
-                    if((prop.x_pos+5) >= user.x_pos && (prop.x_pos+5) <= (user.x_pos+user.x_size)){
+                if((prop.y_pos+prop_size_y) >= user.y_pos && (prop.y_pos+prop_size_y) <= (user.y_pos+user.y_size)){
+                    if((prop.x_pos+prop_size_x) >= user.x_pos && (prop.x_pos+prop_size_x) <= (user.x_pos+user.x_size)){
                         prop.available = 0;
                         //console.log("Props colision");
                         if(prop.type == 1){
@@ -131,8 +139,29 @@ function checkUserPropsColision(user){
             }
         });
     }
+}
 
-
+function checkPlayersColision(user){
+    if(Object.keys(user_registry).length !== 0){
+        Object.keys(user_registry).map(function(key,index) {
+            var userR = user_registry[key];
+            if(userR.pseudo != user.pseudo){
+                if((userR.y_pos+userR.y_size) >= user.y_pos && (userR.y_pos+userR.y_size) <= (user.y_pos+user.y_size)){
+                    if((userR.x_pos+userR.x_size) >= user.x_pos && (userR.x_pos+userR.x_size) <= (user.x_pos+user.x_size)){
+                        userR.y_pos = getRandomInt(space_y_length);
+                        userR.x_pos = getRandomInt(space_x_length);
+                        user.y_pos = getRandomInt(space_y_length);
+                        user.x_pos = getRandomInt(space_x_length);
+                        io.emit('player_colision',{userR:userR,
+                            user:user,
+                        });
+                        user_registry[user.pseudo] = user;
+                        user_registry[userR.pseudo] = userR;
+                    }
+                }
+            }
+        });
+    }
 }
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));

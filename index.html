@@ -27,10 +27,13 @@
             background-image: url('/homer-simpson.svg');
             background-size: contain;
         }
-        .props{
-            width: 5px;
-            height: 10px;
-            background-image: none !important;
+        .bad_props{
+            background-image: url('/salad.svg') !important;
+            background-size: cover!important;
+        }
+        .good_props{
+            background-image: url('/donut.svg') !important;
+            background-size: cover!important;
         }
         #chat_zone{
             background-color: grey;
@@ -63,11 +66,9 @@
         var socket = io();
         var pseudo = prompt('Choisissez un pseudo');
         pseudo = pseudo.replace(/[^a-z0-9]/gi,'');
-        console.log(pseudo)
         socket.emit('nouveau_client',pseudo);
         document.title = pseudo + ' - ' + document.title;
 
-        console.log("ok");
         socket.on('new_player',function(user){
 
             $('#chat_zone').prepend('<p><em>'+ user.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
@@ -110,17 +111,18 @@
         socket.on('new_props_generated',function(props){
             $("#space_wrapper").append("" +
                 "<div id='"+props.id+"' class='props'</div>")
+            $("#"+props.id).css("width",props.x_size);
+            $("#"+props.id).css("heigh",props.y_size);
             $("#"+props.id).css("margin-top",props.y_pos);
             $("#"+props.id).css("margin-left",props.x_pos);
             if(props.type == 1){
-                $("#"+props.id).css("background-color","red");
+                $("#"+props.id).addClass("bad_props");
             }else{
-                $("#"+props.id).css("background-color","green");
+                $("#"+props.id).addClass("good_props");
             }
         });
 
         socket.on('user_prop_colision',function(data){
-            console.log(data);
             $("#"+data.prop.id).remove();
             $("#"+data.user.pseudo).css("height",data.user.y_size);
             $("#"+data.user.pseudo).css("width",data.user.x_size);
@@ -167,6 +169,20 @@
         socket.on('message', function(data){
             insereMessage(data.pseudo, data.message)
         });
+
+        var obj = document.createElement("audio");
+        obj.src="/doh1_y.wav";
+        obj.volume=0.10;
+        obj.autoPlay=false;
+        obj.preLoad=true;
+
+        socket.on('player_colision', function (data) {
+            obj.play();
+            $("#"+data.user.pseudo).css("margin-top",data.user.y_pos+"px");
+            $("#"+data.user.pseudo).css("margin-left",data.user.x_pos+"px");
+            $("#"+data.userR.pseudo).css("margin-top",data.userR.y_pos+"px");
+            $("#"+data.userR.pseudo).css("margin-left",data.userR.x_pos+"px");
+        })
     </script>
 </body>
 </html>
