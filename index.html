@@ -90,10 +90,12 @@
                         "<div id='"+props.id+"' class='props'</div>")
                     $("#"+props.id).css("margin-top",props.y_pos);
                     $("#"+props.id).css("margin-left",props.x_pos);
+                    $("#"+props.id).css("width",props.x_size);
+                    $("#"+props.id).css("heigh",props.y_size);
                     if(props.type == 1){
-                        $("#"+props.id).css("background-color","red");
+                        $("#"+props.id).addClass("bad_props");
                     }else{
-                        $("#"+props.id).css("background-color","green");
+                        $("#"+props.id).addClass("good_props");
                     }
                 }
 
@@ -172,14 +174,19 @@
 
         var obj = document.createElement("audio");
         obj.src="/doh1_y.wav";
-        obj.volume=0.10;
+        obj.volume=0.30;
         obj.autoPlay=false;
         obj.preLoad=true;
 
         socket.on('player_colision', function (data) {
             obj.play();
+            $("#"+data.user.pseudo).css("height",data.user.y_size+"px");
+            $("#"+data.user.pseudo).css("width",data.user.x_size+"px");
             $("#"+data.user.pseudo).css("margin-top",data.user.y_pos+"px");
             $("#"+data.user.pseudo).css("margin-left",data.user.x_pos+"px");
+
+            $("#"+data.userR.pseudo).css("height",data.userR.y_size+"px");
+            $("#"+data.userR.pseudo).css("width",data.userR.x_size+"px");
             $("#"+data.userR.pseudo).css("margin-top",data.userR.y_pos+"px");
             $("#"+data.userR.pseudo).css("margin-left",data.userR.x_pos+"px");
         })

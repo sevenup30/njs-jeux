@@ -49,17 +49,23 @@ io.sockets.on('connection', function(socket,pseudo){
             speed_bonus = (user_size_x - socket.user.x_size)/10;
         }
           if(socket.user.x_pos + (data.x) >= 0 && socket.user.x_pos + (data.x+speed_bonus) <= space_x_length  ){
-            if(data.x != 0){
+            if(data.x > 0){
                 socket.user.x_pos = socket.user.x_pos + (data.x+speed_bonus);
+            }
+            if(data.x < 0){
+                socket.user.x_pos = socket.user.x_pos + (data.x+(-speed_bonus));
             }
           }
           if(socket.user.y_pos + (data.y) >= 0 && socket.user.y_pos + (data.y+speed_bonus) <= space_y_length  ){
-              if(data.y != 0){
+              if(data.y > 0){
                   socket.user.y_pos = socket.user.y_pos + (data.y+speed_bonus);
+              }
+              if(data.y < 0){
+                  socket.user.y_pos = socket.user.y_pos + (data.y+(-speed_bonus));
               }
           }
         checkUserPropsColision(socket.user);
-          checkPlayersColision(socket.user);
+        checkPlayersColision(socket.user);
         io.emit('players_pos_update',{pseudo:socket.user.pseudo,
                 x_pos:socket.user.x_pos,
                 y_pos:socket.user.y_pos});
@@ -118,8 +124,11 @@ function checkUserPropsColision(user){
        Object.keys(props_registry).map(function(key,index){
            var prop = props_registry[key];
             if(prop.available == 1){
-                if((prop.y_pos+prop_size_y) >= user.y_pos && (prop.y_pos+prop_size_y) <= (user.y_pos+user.y_size)){
-                    if((prop.x_pos+prop_size_x) >= user.x_pos && (prop.x_pos+prop_size_x) <= (user.x_pos+user.x_size)){
+                if(prop.x_pos < (user.x_pos+user.x_size) &&
+                (prop.x_pos+prop.x_size) > user.x_pos &&
+                    prop.y_pos < (user.y_pos+user.y_size) &&
+                (prop.y_pos+prop.y_size) > user.y_pos){
+
                         prop.available = 0;
                         //console.log("Props colision");
                         if(prop.type == 1){
@@ -135,7 +144,6 @@ function checkUserPropsColision(user){
                         props_registry[prop.id] = prop;
                         user_registry[user.pseudo] = user;
                     }
-                }
             }
         });
     }
@@ -146,20 +154,30 @@ function checkPlayersColision(user){
         Object.keys(user_registry).map(function(key,index) {
             var userR = user_registry[key];
             if(userR.pseudo != user.pseudo){
-                if((userR.y_pos+userR.y_size) >= user.y_pos && (userR.y_pos+userR.y_size) <= (user.y_pos+user.y_size)){
-                    if((userR.x_pos+userR.x_size) >= user.x_pos && (userR.x_pos+userR.x_size) <= (user.x_pos+user.x_size)){
-                        userR.y_pos = getRandomInt(space_y_length);
-                        userR.x_pos = getRandomInt(space_x_length);
-                        user.y_pos = getRandomInt(space_y_length);
-                        user.x_pos = getRandomInt(space_x_length);
-                        io.emit('player_colision',{userR:userR,
-                            user:user,
-                        });
-                        user_registry[user.pseudo] = user;
-                        user_registry[userR.pseudo] = userR;
-                    }
+               if(userR.x_pos < (user.x_pos+user.x_size) &&
+                  (userR.x_pos+userR.x_size) > user.x_pos &&
+                  userR.y_pos < (user.y_pos+user.y_size) &&
+                  (userR.y_pos+userR.y_size) > user.y_pos
+
+                    ){
+                          if(userR.x_size < user.x_size){
+                              userR.x_size -= 10;
+                              userR.y_size -= 10;
+                          }else{
+                              user.x_size -= 10;
+                              user.y_size -= 10;
+                          }
+                          userR.y_pos = getRandomInt(space_y_length);
+                          userR.x_pos = getRandomInt(space_x_length);
+                          user.y_pos = getRandomInt(space_y_length);
+                          user.x_pos = getRandomInt(space_x_length);
+                          io.emit('player_colision',{userR:userR,
+                              user:user,
+                          });
+                          user_registry[user.pseudo] = user;
+                          user_registry[userR.pseudo] = userR;
+                      }
                 }
-            }
         });
     }
 }
