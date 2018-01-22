@@ -27,6 +27,11 @@
             background-image: url('/homer-simpson.svg');
             background-size: contain;
         }
+        .props{
+            width: 5px;
+            height: 10px;
+            background-image: none !important;
+        }
         #chat_zone{
             background-color: grey;
             color: black;
@@ -57,6 +62,8 @@
     <script>
         var socket = io();
         var pseudo = prompt('Choisissez un pseudo');
+        pseudo = pseudo.replace(/[^a-z0-9]/gi,'');
+        console.log(pseudo)
         socket.emit('nouveau_client',pseudo);
         document.title = pseudo + ' - ' + document.title;
 
@@ -75,7 +82,21 @@
                 $("#"+value.pseudo).css("margin-left",value.x_pos);
                 $("#"+value.pseudo).css("border","1px solid "+value.color);
                 $("#"+value.pseudo).css("background-color",value.color);
-            })
+            });
+            $.each(user.prop_registry,function(key,props){
+                if(props.available == 1){
+                    $("#space_wrapper").append("" +
+                        "<div id='"+props.id+"' class='props'</div>")
+                    $("#"+props.id).css("margin-top",props.y_pos);
+                    $("#"+props.id).css("margin-left",props.x_pos);
+                    if(props.type == 1){
+                        $("#"+props.id).css("background-color","red");
+                    }else{
+                        $("#"+props.id).css("background-color","green");
+                    }
+                }
+
+            });
 
         });
 
@@ -86,8 +107,24 @@
             $("#"+user.pseudo).css("margin-left",user.x_pos+"px");
         });
 
+        socket.on('new_props_generated',function(props){
+            $("#space_wrapper").append("" +
+                "<div id='"+props.id+"' class='props'</div>")
+            $("#"+props.id).css("margin-top",props.y_pos);
+            $("#"+props.id).css("margin-left",props.x_pos);
+            if(props.type == 1){
+                $("#"+props.id).css("background-color","red");
+            }else{
+                $("#"+props.id).css("background-color","green");
+            }
+        });
 
-
+        socket.on('user_prop_colision',function(data){
+            console.log(data);
+            $("#"+data.prop.id).remove();
+            $("#"+data.user.pseudo).css("height",data.user.y_size);
+            $("#"+data.user.pseudo).css("width",data.user.x_size);
+        })
         $(document).keydown(function(e) {
             switch(e.which) {
                 case 37: // left
