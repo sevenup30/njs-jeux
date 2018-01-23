@@ -8,12 +8,13 @@
     <style>
         #space{
             border : 1px solid red;
+            float:left;
         }
         #space_wrapper{
             padding: 2px;
             border-left: 1px solid blue;
             border-bottom: 1px solid blue;
-            height: 1000px;
+            height: 900px;
             width: 1000px;
             position: relative;
         }
@@ -36,6 +37,7 @@
             background-size: cover!important;
         }
         #chat_zone{
+            float: right;
             background-color: grey;
             color: black;
             overflow-y:scroll ;
@@ -133,10 +135,12 @@
         $(document).keydown(function (e) {
             keys[e.which] = true;
             updatePos();
+            e.preventDefault(); // prevent the default action (scroll / move caret)
         });
         $(document).keyup(function (e) {
             delete keys[e.which];
             updatePos();
+            e.preventDefault(); // prevent the default action (scroll / move caret)
         });
         function updatePos() {
             for (var i in keys) {

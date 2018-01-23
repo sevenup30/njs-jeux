@@ -10,7 +10,7 @@ app.get('/', function(req,res){
 app.use(express.static(__dirname + '/img'));
 app.use(express.static(__dirname + '/sound'));
 var space_x_length = 1000;
-var space_y_length = 1000;
+var space_y_length = 900;
 var user_size_x = 100;
 var user_size_y = 100;
 var prop_size_x = 20;
