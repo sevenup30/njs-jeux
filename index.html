@@ -9,13 +9,12 @@
         #space{
             border : 1px solid red;
             float:left;
+            margin:auto;
         }
         #space_wrapper{
             padding: 2px;
             border-left: 1px solid blue;
             border-bottom: 1px solid blue;
-            height: 900px;
-            width: 1000px;
             position: relative;
         }
 
@@ -37,8 +36,9 @@
             background-size: cover!important;
         }
         #chat_zone{
+            width: 500px;
             float: right;
-            background-color: grey;
+            background-color: rgba(204, 204, 204, 0.99);
             color: black;
             overflow-y:scroll ;
         }
@@ -51,14 +51,14 @@
         </div>
     </section>
 
-    <h1> WorkShop CHAT</h1>
-
-    <form action="/" method="post" id="formulaire_chat">
-        <input type="text" id="message" name="message" placeholder="Votre message..." size="100" autofocus/>
-        <input type="submit" id="envoi_message" value="Envoyer"/>
-    </form>
 
     <section id="chat_zone">
+
+        <h1> WorkShop CHAT</h1>
+        <form action="/" method="post" id="formulaire_chat">
+            <input type="text" id="message" name="message" placeholder="Votre message..." size="50" autofocus/>
+            <input type="submit" id="envoi_message" value="Envoyer"/>
+        </form>
 
     </section>
 
@@ -71,12 +71,14 @@
         socket.emit('nouveau_client',pseudo);
         document.title = pseudo + ' - ' + document.title;
 
-        socket.on('new_player',function(user){
+        socket.on('new_player',function(data){
+            $("#space_wrapper").css("height",data.space_y_length);
+            $("#space_wrapper").css("width",data.space_x_length);
 
-            $('#chat_zone').prepend('<p><em>'+ user.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
+            $('#chat_zone').append('<p><em>'+ data.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
                 '' +
-                '<span style="color:'+user.color+';">'+user.color+'</span>');
-            $.each(user.registry,function(key,value){
+                '<span style="color:'+data.color+';">'+data.color+'</span>');
+            $.each(data.registry,function(key,value){
 
                 $("#space_wrapper").append("<div id='"+value.pseudo+"'>"+value.pseudo+"</div>");
                 $("#"+value.pseudo).css("width",value.x_size);
@@ -86,7 +88,7 @@
                 $("#"+value.pseudo).css("border","1px solid "+value.color);
                 $("#"+value.pseudo).css("background-color",value.color);
             });
-            $.each(user.prop_registry,function(key,props){
+            $.each(data.prop_registry,function(key,props){
                 if(props.available == 1){
                     $("#space_wrapper").append("" +
                         "<div id='"+props.id+"' class='props'</div>")
@@ -102,10 +104,9 @@
                 }
 
             });
-
         });
 
-
+        window.location.hash = '#'+pseudo;
         socket.on('players_pos_update',function(user){
 
             $("#"+user.pseudo).css("margin-top",user.y_pos+"px");
@@ -135,17 +136,18 @@
         $(document).keydown(function (e) {
             keys[e.which] = true;
             updatePos();
-            e.preventDefault(); // prevent the default action (scroll / move caret)
+            if(e.which == 37 || e.which == 38 || e.which == 39 || e.which == 40){
+                e.preventDefault(); // prevent the default action (scroll / move caret)
+            }
+
         });
         $(document).keyup(function (e) {
             delete keys[e.which];
             updatePos();
-            e.preventDefault(); // prevent the default action (scroll / move caret)
         });
         function updatePos() {
             for (var i in keys) {
                 if (!keys.hasOwnProperty(i)) continue;
-                console.log(i);
                 switch(i){
                     case "37": // left
                         socket.emit('update_player_pos', {x: -10, y: 0});
@@ -203,7 +205,7 @@
         });
 
         function insereMessage(pseudo,message){
-            $('#chat_zone').prepend('<p><strong>'+pseudo +'</strong> : '+ message+'</p>')
+            $('#chat_zone').append('<p><strong>'+pseudo +'</strong> : '+ message+'</p>')
         }
         // Listener des messages envoyé par le broadcast du serveur
         socket.on('message', function(data){
@@ -228,6 +230,8 @@
             $("#"+data.userR.pseudo).css("margin-top",data.userR.y_pos+"px");
             $("#"+data.userR.pseudo).css("margin-left",data.userR.x_pos+"px");
         })
+
+
     </script>
 </body>
 </html>

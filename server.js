@@ -9,7 +9,7 @@ app.get('/', function(req,res){
 });
 app.use(express.static(__dirname + '/img'));
 app.use(express.static(__dirname + '/sound'));
-var space_x_length = 1000;
+var space_x_length = 1300;
 var space_y_length = 900;
 var user_size_x = 100;
 var user_size_y = 100;
@@ -27,8 +27,8 @@ io.sockets.on('connection', function(socket,pseudo){
         }
 
         socket.user = {pseudo:pseudo,
-                        x_pos:0,
-                        y_pos:480,
+                        x_pos:getRandomInt(space_x_length),
+                        y_pos:getRandomInt(space_y_length),
                         x_size:user_size_x,
                         y_size:user_size_y,
                         color:getRandomColor(),
@@ -39,6 +39,8 @@ io.sockets.on('connection', function(socket,pseudo){
                               color:socket.user.color,
                               registry:user_registry,
                               prop_registry:props_registry,
+                              space_x_length:space_x_length,
+                              space_y_length:space_y_length
                             }
         );
     });
@@ -48,7 +50,7 @@ io.sockets.on('connection', function(socket,pseudo){
         if(socket.user.y_size < user_size_y && socket.user.x_size < user_size_x){
             speed_bonus = (user_size_x - socket.user.x_size)/10;
         }
-          if(socket.user.x_pos + (data.x) >= 0 && socket.user.x_pos + (data.x+speed_bonus) <= space_x_length  ){
+          if((socket.user.x_pos+socket.user.x_size) + (data.x) >= 0 && (socket.user.x_pos+socket.user.x_size) + (data.x+speed_bonus) <= space_x_length  ){
             if(data.x > 0){
                 socket.user.x_pos = socket.user.x_pos + (data.x+speed_bonus);
             }
@@ -56,7 +58,7 @@ io.sockets.on('connection', function(socket,pseudo){
                 socket.user.x_pos = socket.user.x_pos + (data.x+(-speed_bonus));
             }
           }
-          if(socket.user.y_pos + (data.y) >= 0 && socket.user.y_pos + (data.y+speed_bonus) <= space_y_length  ){
+          if((socket.user.y_pos+socket.user.y_size) + (data.y) >= 0 && (socket.user.y_pos+socket.user.y_size) + (data.y+speed_bonus) <= space_y_length  ){
               if(data.y > 0){
                   socket.user.y_pos = socket.user.y_pos + (data.y+speed_bonus);
               }
