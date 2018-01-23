@@ -163,14 +163,20 @@ function checkPlayersColision(user){
                           if(userR.x_size < user.x_size){
                               userR.x_size -= 10;
                               userR.y_size -= 10;
+                              user.x_size += 10;
+                              user.y_size += 10;
+                              userR.y_pos = getRandomInt(space_y_length);
+                              userR.x_pos = getRandomInt(space_x_length);
                           }else{
                               user.x_size -= 10;
                               user.y_size -= 10;
+                              userR.x_size += 10;
+                              userR.y_size += 10;
+                              user.y_pos = getRandomInt(space_y_length);
+                              user.x_pos = getRandomInt(space_x_length);
                           }
-                          userR.y_pos = getRandomInt(space_y_length);
-                          userR.x_pos = getRandomInt(space_x_length);
-                          user.y_pos = getRandomInt(space_y_length);
-                          user.x_pos = getRandomInt(space_x_length);
+
+
                           io.emit('player_colision',{userR:userR,
                               user:user,
                           });

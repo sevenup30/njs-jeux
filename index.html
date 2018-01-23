@@ -77,8 +77,8 @@
             $.each(user.registry,function(key,value){
 
                 $("#space_wrapper").append("<div id='"+value.pseudo+"'>"+value.pseudo+"</div>");
-                $("#"+value.pseudo).css("width","100px");
-                $("#"+value.pseudo).css("height","100px");
+                $("#"+value.pseudo).css("width",value.x_size);
+                $("#"+value.pseudo).css("height",value.y_size);
                 $("#"+value.pseudo).css("margin-top",value.y_pos);
                 $("#"+value.pseudo).css("margin-left",value.x_pos);
                 $("#"+value.pseudo).css("border","1px solid "+value.color);
@@ -129,7 +129,42 @@
             $("#"+data.user.pseudo).css("height",data.user.y_size);
             $("#"+data.user.pseudo).css("width",data.user.x_size);
         })
-        $(document).keydown(function(e) {
+        var keys = {};
+        $(document).keydown(function (e) {
+            keys[e.which] = true;
+            updatePos();
+        });
+        $(document).keyup(function (e) {
+            delete keys[e.which];
+            updatePos();
+        });
+        function updatePos() {
+            for (var i in keys) {
+                if (!keys.hasOwnProperty(i)) continue;
+                console.log(i);
+                switch(i){
+                    case "37": // left
+                        socket.emit('update_player_pos', {x: -10, y: 0});
+                        break;
+
+                    case "38": // up
+                        socket.emit('update_player_pos', {y: -10, x: 0});
+                        break;
+
+                    case "39": // right
+                        socket.emit('update_player_pos', {x: 10, y: 0});
+                        break;
+
+                    case "40": // down
+                        socket.emit('update_player_pos', {y: 10, x: 0});
+                        break;
+
+                    default:
+                        return; // exit this handler for other keys
+                }
+            }
+        }
+       /* $(document).keydown(function(e) {
             switch(e.which) {
                 case 37: // left
                     socket.emit('update_player_pos',{x:-10,y:0});
@@ -150,8 +185,7 @@
                 default: return; // exit this handler for other keys
             }
             e.preventDefault(); // prevent the default action (scroll / move caret)
-        });
-
+        });*/
 
         // Envoie des messages vers le serveur
 
