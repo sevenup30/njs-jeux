@@ -9,8 +9,8 @@ app.get('/', function(req,res){
 });
 app.use(express.static(__dirname + '/img'));
 app.use(express.static(__dirname + '/sound'));
-var space_x_length = 1300;
-var space_y_length = 900;
+var space_x_length = 4000;
+var space_y_length = 2000;
 var user_size_x = 100;
 var user_size_y = 100;
 var prop_size_x = 20;
@@ -35,7 +35,8 @@ io.sockets.on('connection', function(socket,pseudo){
         }
         var registry_new_entry = socket.user.pseudo;
         user_registry[registry_new_entry] = socket.user;
-        io.emit('new_player',{pseudo:socket.user.pseudo,
+        io.emit('new_player',{user:socket.user,
+                            pseudo:socket.user.pseudo,
                               color:socket.user.color,
                               registry:user_registry,
                               prop_registry:props_registry,
@@ -72,7 +73,7 @@ io.sockets.on('connection', function(socket,pseudo){
                 x_pos:socket.user.x_pos,
                 y_pos:socket.user.y_pos});
           user_registry[socket.user.pseudo] = socket.user;
-
+            socket.emit('update_your_position',{user:socket.user});
           generateNewProps = getRandomInt(99);
           if(generateNewProps == 50){
               newPropsGenerated = generateRandomProps();

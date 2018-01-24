@@ -10,6 +10,9 @@
             border : 1px solid red;
             float:left;
             margin:auto;
+            width:1200px;
+            height: 800px;
+            overflow: scroll;
         }
         #space_wrapper{
             padding: 2px;
@@ -75,6 +78,9 @@
             $("#space_wrapper").css("height",data.space_y_length);
             $("#space_wrapper").css("width",data.space_x_length);
 
+            var scroll = getScroll(data.user);
+            $("#space").animate({scrollTop:scroll.yScroll},30);
+            $("#space").animate({scrollLeft:scroll.xScroll},30);
             $('#chat_zone').append('<p><em>'+ data.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
                 '' +
                 '<span style="color:'+data.color+';">'+data.color+'</span>');
@@ -111,6 +117,7 @@
 
             $("#"+user.pseudo).css("margin-top",user.y_pos+"px");
             $("#"+user.pseudo).css("margin-left",user.x_pos+"px");
+
         });
 
         socket.on('new_props_generated',function(props){
@@ -132,12 +139,19 @@
             $("#"+data.user.pseudo).css("height",data.user.y_size);
             $("#"+data.user.pseudo).css("width",data.user.x_size);
         })
+
+        socket.on('update_your_position',function(data){
+            var scroll = getScroll(data.user);
+            $("#space").animate({scrollTop:scroll.yScroll},3);
+            $("#space").animate({scrollLeft:scroll.xScroll},3);
+        })
         var keys = {};
         $(document).keydown(function (e) {
             keys[e.which] = true;
             updatePos();
             if(e.which == 37 || e.which == 38 || e.which == 39 || e.which == 40){
                 e.preventDefault(); // prevent the default action (scroll / move caret)
+
             }
 
         });
@@ -170,28 +184,6 @@
                 }
             }
         }
-       /* $(document).keydown(function(e) {
-            switch(e.which) {
-                case 37: // left
-                    socket.emit('update_player_pos',{x:-10,y:0});
-                    break;
-
-                case 38: // up
-                    socket.emit('update_player_pos',{y:-10,x:0});
-                    break;
-
-                case 39: // right
-                    socket.emit('update_player_pos',{x:10,y:0});
-                    break;
-
-                case 40: // down
-                    socket.emit('update_player_pos',{y:10,x:0});
-                    break;
-
-                default: return; // exit this handler for other keys
-            }
-            e.preventDefault(); // prevent the default action (scroll / move caret)
-        });*/
 
         // Envoie des messages vers le serveur
 
@@ -231,6 +223,25 @@
             $("#"+data.userR.pseudo).css("margin-left",data.userR.x_pos+"px");
         })
 
+        function getScroll(player){
+            var scroll = {};
+            var xDeadZone = $("#space").width()/2
+            var yDeadZone = $("#space").height()/2
+            if((player.y_pos - yDeadZone)>=0 ){
+                scroll.yScroll = (player.y_pos-yDeadZone);
+            }else{
+                scroll.yScroll = 0;
+            }
+
+            if((player.x_pos - xDeadZone)>=0 ){
+                scroll.xScroll = (player.x_pos-xDeadZone);
+            }else{
+                scroll.xScroll = 0;
+            }
+
+
+            return scroll;
+        }
 
     </script>
 </body>
