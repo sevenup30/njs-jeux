@@ -91,11 +91,7 @@
             $('#chat_zone').append('<p><em>'+ data.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
                 '' +
                 '<span style="color:'+data.color+';">'+data.color+'</span>');
-            $("#score_table").append('' +
-                '<tr><td style="color:'+data.color+'">' +
-                '' +data.pseudo+
-                '</td>' +
-                '<td id="score_'+data.pseudo+'">0</td></tr>')
+
             $.each(data.registry,function(key,value){
 
                 $("#space_wrapper").append("<div id='"+value.pseudo+"'>"+value.pseudo+"</div>");
@@ -105,6 +101,11 @@
                 $("#"+value.pseudo).css("margin-left",value.x_pos);
                 $("#"+value.pseudo).css("border","1px solid "+value.color);
                 $("#"+value.pseudo).css("background-color",value.color);
+                $("#score_table").append('' +
+                    '<tr><td style="color:'+value.color+'">' +
+                    '' +value.pseudo+
+                    '</td>' +
+                    '<td id="score_'+value.pseudo+'">0</td></tr>')
             });
             $.each(data.prop_registry,function(key,props){
                 if(props.available == 1){
@@ -130,7 +131,6 @@
             $("#"+user.pseudo).css("margin-top",user.y_pos+"px");
             $("#"+user.pseudo).css("margin-left",user.x_pos+"px");
             $("#score_"+user.pseudo).html(user.score);
-            console.log(user.score);
 
         });
 
