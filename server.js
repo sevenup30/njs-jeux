@@ -25,12 +25,15 @@ io.sockets.on('connection', function(socket,pseudo){
         }else{
             pseudo = ent.encode(pseudo.replace("/[^0-9a-zA-Z-\/_]/",''));
         }
-
+        var now = new Date();
+        now = Math.floor(now/1000);
         socket.user = {pseudo:pseudo,
                         x_pos:getRandomInt(space_x_length),
                         y_pos:getRandomInt(space_y_length),
                         x_size:user_size_x,
                         y_size:user_size_y,
+                        score:0,
+                        last_donut_ate: now,
                         color:getRandomColor(),
         }
         var registry_new_entry = socket.user.pseudo;
@@ -69,9 +72,17 @@ io.sockets.on('connection', function(socket,pseudo){
           }
         checkUserPropsColision(socket.user);
         checkPlayersColision(socket.user);
+        var datecheck = new Date();
+        datecheck = Math.floor(datecheck/1000);
+        if((datecheck - socket.user.last_donut_ate) > 30 && socket.user.y_size > user_size_y ){
+            socket.user.x_size -= 10;
+            socket.user.y_size -= 10;
+            io.emit('player_size_update',{user:socket.user});
+        }
         io.emit('players_pos_update',{pseudo:socket.user.pseudo,
                 x_pos:socket.user.x_pos,
-                y_pos:socket.user.y_pos});
+                y_pos:socket.user.y_pos,
+            score:socket.user.score});
           user_registry[socket.user.pseudo] = socket.user;
             socket.emit('update_your_position',{user:socket.user});
           generateNewProps = getRandomInt(99);
@@ -137,9 +148,15 @@ function checkUserPropsColision(user){
                         if(prop.type == 1){
                             user.x_size -= 10;
                             user.y_size -= 10;
+                            user.score -= 1;
                         }else{
+                            var now = new Date();
+                            now = Math.floor(now/1000);
                             user.x_size += 10;
                             user.y_size += 10;
+                            user.score += 1;
+                            user.last_donut_ate = now;
+                            console.log("now"+now);
                         }
                         io.emit('user_prop_colision',{prop:prop,
                         user:user,
@@ -166,15 +183,19 @@ function checkPlayersColision(user){
                           if(userR.x_size < user.x_size){
                               userR.x_size -= 10;
                               userR.y_size -= 10;
+                              userR.score -= 10;
                               user.x_size += 10;
                               user.y_size += 10;
+                              user.score += 10;
                               userR.y_pos = getRandomInt(space_y_length);
                               userR.x_pos = getRandomInt(space_x_length);
                           }else{
                               user.x_size -= 10;
                               user.y_size -= 10;
+                              user.score -= 10;
                               userR.x_size += 10;
                               userR.y_size += 10;
+                              userR.score += 10;
                               user.y_pos = getRandomInt(space_y_length);
                               user.x_pos = getRandomInt(space_x_length);
                           }

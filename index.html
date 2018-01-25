@@ -56,7 +56,14 @@
 
 
     <section id="chat_zone">
-
+        <div id="score">
+            <table id="score_table">
+                <tr>
+                    <th> NOM</th>
+                    <th> SCORE</th>
+                </tr>
+            </table>
+        </div>
         <h1> WorkShop CHAT</h1>
         <form action="/" method="post" id="formulaire_chat">
             <input type="text" id="message" name="message" placeholder="Votre message..." size="50" autofocus/>
@@ -84,6 +91,11 @@
             $('#chat_zone').append('<p><em>'+ data.pseudo+'</em> vient de se connecter, Il a la couleur</p> ' +
                 '' +
                 '<span style="color:'+data.color+';">'+data.color+'</span>');
+            $("#score_table").append('' +
+                '<tr><td style="color:'+data.color+'">' +
+                '' +data.pseudo+
+                '</td>' +
+                '<td id="score_'+data.pseudo+'">0</td></tr>')
             $.each(data.registry,function(key,value){
 
                 $("#space_wrapper").append("<div id='"+value.pseudo+"'>"+value.pseudo+"</div>");
@@ -117,6 +129,8 @@
 
             $("#"+user.pseudo).css("margin-top",user.y_pos+"px");
             $("#"+user.pseudo).css("margin-left",user.x_pos+"px");
+            $("#score_"+user.pseudo).html(user.score);
+            console.log(user.score);
 
         });
 
@@ -133,7 +147,10 @@
                 $("#"+props.id).addClass("good_props");
             }
         });
-
+        socket.on('player_size_update',function(data){
+            $("#"+data.user.pseudo).css("height",data.user.y_size);
+            $("#"+data.user.pseudo).css("width",data.user.x_size);
+        })
         socket.on('user_prop_colision',function(data){
             $("#"+data.prop.id).remove();
             $("#"+data.user.pseudo).css("height",data.user.y_size);
